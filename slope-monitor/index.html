@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>露天矿边坡安全监测面板</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header>
+  <div class="title">
+    <h1>露天矿边坡安全监测面板</h1>
+    <div class="sub">GNSS 位移监测 · 雷达边坡监测 · 数据周期 1 小时 · 采场边坡 / 排土场边坡</div>
+  </div>
+  <div class="chips" id="chips"></div>
+  <div class="clock">
+    <div id="clock">--</div>
+    <div class="mut" id="last-update"></div>
+  </div>
+</header>
+
+<main>
+  <!-- 3D 坡面示意 -->
+  <section id="scene-panel" class="panel">
+    <div class="panel-head">
+      <span>边坡三维示意 · 监测点分布与当前安全等级</span>
+      <button id="btn-rotate" class="btn sm">⏸ 暂停旋转</button>
+    </div>
+    <div id="scene3d"></div>
+    <div class="legend" id="legend"></div>
+    <div class="scene-tip">拖动旋转 · 滚轮缩放 · 点击监测点查看 30 天位移曲线</div>
+  </section>
+
+  <!-- 侧栏 -->
+  <aside>
+    <div class="panel">
+      <div class="panel-head"><span>监测点实时状态</span><span class="mut" style="font-weight:400;font-size:11px">速率 mm/d · 累计 mm</span></div>
+      <div id="point-list" class="scroll"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span>近 7 天报警事件</span></div>
+      <div id="alarm-list" class="scroll"></div>
+    </div>
+  </aside>
+</main>
+
+<!-- 周报（页面加载自动生成） -->
+<section id="report-section" class="panel">
+  <div class="panel-head">
+    <span>本周边坡监测报告 <span class="mut" id="report-period" style="font-weight:400"></span></span>
+    <div class="no-print">
+      <button class="btn sm" id="btn-regen">↻ 重新生成</button>
+      <button class="btn sm" id="btn-dl">⬇ 下载报告 (HTML)</button>
+      <button class="btn sm" id="btn-print">🖨 打印 / PDF</button>
+    </div>
+  </div>
+  <div id="report-body"></div>
+</section>
+
+<!-- 监测点详情弹窗 -->
+<div id="modal">
+  <div class="modal-card">
+    <div class="modal-head">
+      <div><b id="m-id"></b>　<span id="m-desc" class="mut"></span>　<span id="m-badge" class="tag"></span></div>
+      <div>
+        <button class="btn sm" id="m-csv">⬇ 导出 CSV</button>
+        <button class="btn sm" id="m-close">✕ 关闭</button>
+      </div>
+    </div>
+    <div class="stats" id="m-stats"></div>
+    <div id="modal-chart"></div>
+  </div>
+</div>
+
+<script src="vendor/echarts.min.js"></script>
+<script src="vendor/echarts-gl.min.js"></script>
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
