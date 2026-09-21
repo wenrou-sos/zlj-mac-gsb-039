@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>露天矿边坡安全监测面板</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ================= 顶栏 ================= -->
+<header>
+  <div class="logo">⛏️</div>
+  <div class="title">
+    <h1>露天矿边坡安全监测面板</h1>
+    <span>GNSS 位移监测 · 雷达边坡监测 联合系统</span>
+  </div>
+  <div class="spacer"></div>
+  <div class="overall" id="overallBadge">综合状态：--</div>
+  <div class="clock">
+    <div id="realClock">--</div>
+    <div id="dataClock">--</div>
+  </div>
+  <div class="actions">
+    <div class="dropdown">
+      <button id="btnReports">📄 监测周报<span id="reportBadge">0</span></button>
+      <div id="reportList" class="dropdown-menu"></div>
+    </div>
+    <button id="btnGenReport">⟳ 生成本周报告</button>
+  </div>
+</header>
+
+<!-- ================= 主区域 ================= -->
+<main>
+  <!-- 左：统计 + 测点列表 -->
+  <aside id="leftPanel">
+    <section class="stats">
+      <div class="panel-title" style="padding:0;border:none;">监测点安全等级分布</div>
+      <div class="stat-grid">
+        <div class="stat-chip c-total"><b id="statTotal">0</b><span>总数</span></div>
+        <div class="stat-chip c-safe"><b id="statSafe">0</b><span>安全</span></div>
+        <div class="stat-chip c-warn"><b id="statWarn">0</b><span>预警</span></div>
+        <div class="stat-chip c-alert"><b id="statAlert">0</b><span>警示</span></div>
+        <div class="stat-chip c-alarm"><b id="statAlarm">0</b><span>报警</span></div>
+      </div>
+    </section>
+    <div class="panel-title">监测点列表<span class="sub">点击行定位 · 📈 查看曲线</span></div>
+    <div id="pointList"></div>
+  </aside>
+
+  <!-- 中：3D 坡面示意 -->
+  <section id="viewport">
+    <div id="scene3d"></div>
+    <div class="hint">左键旋转 · 右键平移 · 滚轮缩放 · 点击测点查看 30 天位移曲线</div>
+    <div class="view-btns">
+      <button data-view="all">全景</button>
+      <button data-view="pit">采场边坡</button>
+      <button data-view="dump">排土场</button>
+    </div>
+    <div class="legend">
+      <div class="lg-title">安全等级（位移速率）</div>
+      <div class="lg-row"><span class="lg-dot" style="background:#22c55e"></span>安全 &lt; 2 mm/d</div>
+      <div class="lg-row"><span class="lg-dot" style="background:#eab308"></span>预警 2 ~ 5 mm/d</div>
+      <div class="lg-row"><span class="lg-dot" style="background:#f97316"></span>警示 5 ~ 10 mm/d</div>
+      <div class="lg-row"><span class="lg-dot" style="background:#ef4444"></span>报警 &gt; 10 mm/d</div>
+    </div>
+  </section>
+
+  <!-- 右：详情 + 报警 + 日志 -->
+  <aside id="rightPanel">
+    <section id="detailCard">
+      <div class="d-head"><b id="dName">--</b><span id="dStatus">--</span></div>
+      <div id="dMeta">--</div>
+      <div class="d-grid">
+        <div class="d-cell"><div class="k">水平位移（30天累计）</div><div class="v" id="dDH">--</div></div>
+        <div class="d-cell"><div class="k">垂直位移（30天累计）</div><div class="v" id="dDV">--</div></div>
+        <div class="d-cell"><div class="k">合位移</div><div class="v" id="dTot">--</div></div>
+        <div class="d-cell"><div class="k">当前位移速率</div><div class="v" id="dRate">--</div></div>
+        <div class="d-cell"><div class="k">最近上报时间</div><div class="v" id="dTime" style="font-size:13px">--</div></div>
+        <div class="d-cell"><div class="k">数据完整率</div><div class="v" id="dUptime" style="font-size:13px">--</div></div>
+      </div>
+      <div class="d-btns">
+        <button id="btnShowChart">📈 位移曲线</button>
+        <button id="btnLocate">🎯 3D 定位</button>
+      </div>
+    </section>
+    <section id="alarmPanel">
+      <div class="panel-title">报警事件<span class="sub">近30天</span></div>
+      <div id="alarmList"></div>
+    </section>
+    <section id="logPanel">
+      <div class="panel-title">数据上报日志<span class="sub">逐小时</span></div>
+      <div id="logList"></div>
+    </section>
+  </aside>
+</main>
+
+<!-- ================= 底栏 ================= -->
+<footer>
+  <span class="dot"></span>
+  <span id="footerStatus">系统初始化中…</span>
+</footer>
+
+<!-- ================= 测点曲线弹窗 ================= -->
+<div id="chartModal" class="modal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3 id="chartModalTitle">测点曲线</h3>
+      <span id="chartModalBadge">--</span>
+      <span class="sub" id="chartModalSub"></span>
+      <button class="modal-close" id="btnChartClose">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="chartDisp"></div>
+      <div id="chartRate"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= 周报弹窗 ================= -->
+<div id="reportModal" class="modal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3>边坡安全监测周报</h3>
+      <div class="rp-actions">
+        <button id="btnReportPrint">🖨 打印</button>
+        <button id="btnReportDownload">⬇ 下载HTML</button>
+        <button class="modal-close" id="btnReportClose">✕</button>
+      </div>
+    </div>
+    <div id="reportPaperWrap">
+      <div class="report-paper" id="reportPaper"></div>
+    </div>
+  </div>
+</div>
+
+<script src="vendor/three.min.js"></script>
+<script src="vendor/OrbitControls.js"></script>
+<script src="vendor/echarts.min.js"></script>
+<script src="js/data.js"></script>
+<script src="js/scene3d.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/report.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
